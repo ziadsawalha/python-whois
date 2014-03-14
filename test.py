@@ -14,7 +14,7 @@ ENDC = '\033[0m'
 def encoded_json_dumps(obj):
 	try:
 		return json.dumps(obj, default=json_fallback)
-	except UnicodeDecodeError, e:
+	except UnicodeDecodeError as e:
 		return json.dumps(recursive_encode(obj, "latin-1"), default=json_fallback)
 
 def json_fallback(obj):
@@ -24,7 +24,7 @@ def json_fallback(obj):
 		return obj
 
 def recursive_encode(obj, encoding):
-	for key in obj.keys():
+	for key in list(obj.keys()):
 		if isinstance(obj[key], dict):
 			obj[key] = recursive_encode(obj[key], encoding)
 		elif isinstance(obj[key], list):
@@ -76,7 +76,7 @@ if args.mode[0] == "run":
 		try:
 			with open(os.path.join("test/data", target), "r") as f:
 				data = f.read().split("\n--\n")
-		except IOError, e:
+		except IOError as e:
 			sys.stderr.write("Invalid domain %(domain)s specified. No test case or base data exists.\n" % {"domain": target})
 			errors = True
 			continue
@@ -85,7 +85,7 @@ if args.mode[0] == "run":
 				default = f.read()
 			with open(os.path.join("test/target_normalized", target), "r") as f:
 				normalized = f.read()
-		except IOError, e:
+		except IOError as e:
 			sys.stderr.write("Missing target data for domain %(domain)s. Run `./test.py update %(domain)s` to correct this, after verifying that pythonwhois can correctly parse this particular domain.\n" % {"domain": target})
 			errors = True
 			continue
@@ -155,7 +155,7 @@ elif args.mode[0] == "update":
 			with open(os.path.join("test/data", target), "r") as f:
 				data = f.read().split("\n--\n")
 			updates.append((target, data))
-		except IOError, e:
+		except IOError as e:
 			sys.stderr.write("Invalid domain %(domain)s specified. No base data exists.\n" % {"domain": target})
 			errors = True
 			continue
@@ -170,4 +170,4 @@ elif args.mode[0] == "update":
 			f.write(encoded_json_dumps(default))
 		with open(os.path.join("test/target_normalized", target), "w") as f:
 			f.write(encoded_json_dumps(normalized))	
-		print "Generated target data for %s." % target
+		print("Generated target data for %s." % target)
